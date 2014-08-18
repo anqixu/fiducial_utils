@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import os
 import cv2
+import copy
+import random
 
 image_folder = '../images/artag'
 patt_folder = '../artoolkit_patterns/artag'
@@ -75,12 +77,39 @@ for i in xrange(1024):
     if k == ord('x') or k == ord('X'):
       break
 
+# NOTE: artoolkit only seems to be able to accept 50 tags
+cmd = 'rm %s/../artag_rand50/*.png' % image_folder
+print cmd
+os.system(cmd)
+rand_ids = copy.copy(valid_ids)
+random.shuffle(rand_ids)
+maxcount = min(50, len(rand_ids))
+rand_ids = rand_ids[:maxcount]
+rand_ids.sort()
 datafile = '%s/object_data' % patt_folder
 f = open(datafile, 'w')
 f.write('#the number of patterns to be recognized\n')
-f.write('%d\n\n' % len(valid_ids))
-for i in valid_ids:
-  f.write('%d\nartag_%04d.pat\n86.0\n0.0 0.0\n\n' % (i, i))
+f.write('%d\n\n' % maxcount)
+i = 0
+for j in rand_ids:
+  f.write('%d\nartag_%04d.pat\n86.0\n0.0 0.0\n\n' % (i, j))
+  i += 1
+  cmd = 'cp %s/artag_%04d.png %s/../artag_rand50/artag_%04d.png' % (image_folder, j, image_folder, j)
+  print cmd
+  os.system(cmd)
 f.write('\n')
 f.close()
 print 'Wrote to', datafile
+cmd = 'chmod +x %s' % datafile
+print cmd
+os.system(cmd)
+
+idfile =  '%s/rand50_ids' % patt_folder
+f = open(idfile, 'w')
+for j in rand_ids:
+  f.write('%d\n' % j)
+f.close()
+print 'Wrote to', idfile
+
+print 'Using the following %d random tags:' % maxcount
+print rand_ids
