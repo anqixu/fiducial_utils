@@ -15,7 +15,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+find_package(GLUT REQUIRED)
+find_package(OpenGL REQUIRED)
 
+add_definitions(${GLUT_DEFINITIONS})
+add_definitions(${OpenGL_DEFINITIONS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -85,7 +90,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES fiducial_utils
-#  CATKIN_DEPENDS apriltag_ros ar_recog aruco_ros roscpp rospy std_msgs
+  CATKIN_DEPENDS apriltag_ros ar_recog aruco_ros roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -98,6 +103,13 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${GLUT_INCLUDE_DIRS}
+  ${OpenGL_INCLUDE_DIRS}
+)
+
+link_directories(
+  ${GLUT_LIBRARY_DIRS}
+  ${OpenGL_LIBRARY_DIRS}
 )
 
 ## Declare a cpp library
@@ -106,7 +118,13 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(fiducial_utils_node src/fiducial_utils_node.cpp)
+add_executable(tag_scene_generator src/tag_scene_generator.cpp)
+target_link_libraries(tag_scene_generator
+  ${GLUT_LIBRARY}
+  ${OPENGL_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
